@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Journal Article Generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        /* Jorunn Dark Theme Inspiration */
+        :root {
+            --bg-color: #16161a;
+            --card-bg: #242629;
+            --text-main: #94a1b2;
+            --text-heading: #fffffe;
+            --accent-color: #7f5af0;
+            --accent-hover: #6943d6;
+            --border-color: #2cb67d;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        header h1 {
+            font-family: 'Lora', serif;
+            color: var(--text-heading);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        header p {
+            margin-bottom: 40px;
+            font-size: 1rem;
+        }
+
+        .article-card {
+            background-color: var(--card-bg);
+            padding: 40px 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border-top: 4px solid var(--border-color);
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: transform 0.3s ease;
+        }
+
+        .article-title {
+            font-family: 'Lora', serif;
+            font-size: 1.75rem;
+            color: var(--text-heading);
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+
+        .links {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .links a {
+            text-decoration: none;
+            color: var(--text-heading);
+            background-color: transparent;
+            border: 1px solid var(--text-main);
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .links a:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .generate-btn {
+            margin-top: 40px;
+            background-color: var(--accent-color);
+            color: #fffffe;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            box-shadow: 0 4px 15px rgba(127, 90, 240, 0.3);
+        }
+
+        .generate-btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .generate-btn:active {
+            transform: scale(0.98);
+        }
+
+        .loader {
+            display: none;
+            font-style: italic;
+            color: var(--text-main);
+        }
+
+        /* Responsiveness */
+        @media (max-width: 480px) {
+            header h1 {
+                font-size: 2rem;
+            }
+            .article-title {
+                font-size: 1.4rem;
+            }
+            .links {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Journal Explorer</h1>
+            <p>Discover random literature from the repository.</p>
+        </header>
+
+        <div class="article-card" id="articleCard">
+            <div id="content">
+                <div class="article-title">Click the button below to generate a random article.</div>
+                <div class="links">
+                    <!-- Links will appear here -->
+                </div>
+            </div>
+            <div class="loader" id="loader">Fetching from repository...</div>
+        </div>
+
+        <button class="generate-btn" id="generateBtn" onclick="fetchRandomArticle()">Generate Random Article</button>
+    </div>
+
+    <script>
+        // GANTI URL DI BAWAH INI DENGAN URL VERCEL ANDA
+        const API_URL = 'https://random-article-six.vercel.app/api/random';
+
+        async function fetchRandomArticle() {
+            const contentDiv = document.getElementById('content');
+            const loaderDiv = document.getElementById('loader');
+            const btn = document.getElementById('generateBtn');
+
+            // Tampilan Loading
+            contentDiv.style.display = 'none';
+            loaderDiv.style.display = 'block';
+            btn.disabled = true;
+            btn.style.opacity = '0.7';
+
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) {
+                    throw new Error('Gagal mengambil data');
+                }
+                const data = await response.json();
+
+                // Update UI dengan data baru
+                contentDiv.innerHTML = `
+                    <div class="article-title">${data.judul}</div>
+                    <div class="links">
+                        ${data.link1 ? `<a href="${data.link1}" target="_blank" rel="noopener noreferrer">Read Source 1</a>` : ''}
+                        ${data.link2 ? `<a href="${data.link2}" target="_blank" rel="noopener noreferrer">Read Source 2</a>` : ''}
+                    </div>
+                `;
+            } catch (error) {
+                contentDiv.innerHTML = `<div class="article-title" style="color: #ef4565;">Error: Unable to load article. Please try again.</div>`;
+                console.error("Error fetching article:", error);
+            } finally {
+                // Kembalikan Tampilan
+                loaderDiv.style.display = 'none';
+                contentDiv.style.display = 'block';
+                btn.disabled = false;
+                btn.style.opacity = '1';
+            }
+        }
+    </script>
+</body>
+</html>
